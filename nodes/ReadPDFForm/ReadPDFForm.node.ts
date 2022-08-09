@@ -7,6 +7,8 @@ import {
 } from 'n8n-workflow';
 
 import PDFJS from 'pdfjs-dist';
+import { TextContent, TextMarkedContent } from 'pdfjs-dist/types/src/display/api';
+import { TextItem } from 'pdfjs-dist/types/src/display/api';
 
 export class ReadPDFForm implements INodeType {
 	description: INodeTypeDescription = {
@@ -76,93 +78,75 @@ export class ReadPDFForm implements INodeType {
 		return this.prepareOutputData(returnData);
 	}
 }
+
 const DEFAULT_OPTIONS = {
 		max: 0,
-}
-async function PDF(dataBuffer: any) {
-    var isDebugMode = false;
+};
 
-		interface InfoObject {
-			[key: string]: any
-		}
-		let infoObj: InfoObject = {};
-    let ret = {
-        numpages: 0,
-        numrender: 0,
-        info: infoObj,
-        metadata: {},
-        text: "",
-        version: "",
-		formData: null
-    };
+async function PDF(dataBuffer: {}) {
+	const isDebugMode = false;
 
-    ret.version = PDFJS.version;
-
-    let loadingTask = PDFJS.getDocument(dataBuffer);
-  	let doc = await loadingTask.promise;
-	  ret.numpages = doc.numPages;
-
-		let metaData = await doc.getMetadata().catch(function(err) {
-			return null;
-		});
-
-		ret.info = metaData ? metaData.info : {};
-		ret.metadata = metaData ? metaData.metadata : {};
-
-		if (ret.info != null && ret.info.IsAcroFormPresent) {
-			let formData = await doc.getFieldObjects().catch(function(err: any) {
-			return err;
-			});
-			ret.formData = formData ? formData : null;
-		};
-
-		let counter = 0;
-		counter = counter > doc.numPages ? doc.numPages : counter;
-
-		ret.text = "";
-
-		for (var i = 1; i <= counter; i++) {
-			let pageText = doc.getPage(i).then((pageData: any) => render_page(pageData)).catch((err)=>{
-				// todo log err using debug
-				debugger;
-				return "";
-			});
-
-			ret.text = `${ret.text}\n\n${pageText}`;
-		}
-
-		ret.numrender = counter;
-		doc.destroy();
-
-		return ret;
+	const ret = {
+		numpages: 0,
+		numrender: 0,
+		info: {},
+		metadata: {},
+		text: "",
+		version: "",
+		formData: {},
 	};
 
-	async function render_page(pageData: {
-			getTextContent: (arg0: {
-				//replaces all occurrences of whitespace with standard spaces (0x20). The default value is `false`.
-				normalizeWhitespace: boolean;
-				//do not attempt to combine same line TextItem's. The default value is `false`.
-				disableCombineTextItems: boolean;
-			}) => Promise<any>;
-		}) {
+	ret.version = PDFJS.version;
 
-    let render_options = {
-        //replaces all occurrences of whitespace with standard spaces (0x20). The default value is `false`.
-        normalizeWhitespace: false,
-        //do not attempt to combine same line TextItem's. The default value is `false`.
-        disableCombineTextItems: false
-    }
+	const loadingTask = PDFJS.getDocument(dataBuffer);
+	const doc = await loadingTask.promise;
+	ret.numpages = doc.numPages;
 
-    const textContent = await pageData.getTextContent(render_options);
-		let lastY, text = '';
-		for (let item of textContent.items) {
-			if (lastY == item.transform[5] || !lastY) {
-				text += item.str;
-			}
-			else {
-				text += '\n' + item.str;
-			}
-			lastY = item.transform[5];
+	const metaData = await doc.getMetadata().catch((err) => {
+		return err;
+	});
+
+	ret.info = metaData ? metaData.info : {};
+	ret.metadata = metaData ? metaData.metadata : {};
+
+	if (ret.info != null && metaData.info.IsAcroFormPresent) {
+		const formData = await doc.getFieldObjects().catch((err) => {
+			return err;
+		});
+		ret.formData = formData ? formData : {};
+	}
+
+	let counter = 0;
+	counter = counter > doc.numPages ? doc.numPages : counter;
+
+	ret.text = "";
+
+	for (let i = 1; i <= counter; i++) {
+		const pageText = doc.getPage(i).then((pageData) =>
+		render_page(pageData)).catch((err)=>{
+			return err;
+		});
+		ret.text = `${ret.text}\n\n${pageText}`;
+	}
+	ret.numrender = counter;
+	doc.destroy();
+	return ret;
+}
+
+async function render_page(pageData: {
+		getTextContent: () => Promise<TextContent>;
+	}) {
+
+	const textContent = await pageData.getTextContent();
+	let lastY, text = '';
+	for ( const item of textContent.items) {
+		if (lastY === (item as TextItem).transform[5] || !lastY) {
+			text += (item as TextItem).str;
 		}
-		return text;
+		else {
+			text += '\n' + (item as TextItem).str;
+		}
+		lastY = (item as TextItem).transform[5];
+	}
+	return text;
 }
