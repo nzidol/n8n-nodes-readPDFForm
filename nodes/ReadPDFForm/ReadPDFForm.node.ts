@@ -6,7 +6,8 @@ import {
 	INodeTypeDescription,
 } from 'n8n-workflow';
 
-import PDFJS from 'pdfjs-dist';
+import * as PDFJS from "pdfjs-dist/legacy/build/pdf.js";
+
 import { TextContent, TextMarkedContent } from 'pdfjs-dist/types/src/display/api';
 import { TextItem } from 'pdfjs-dist/types/src/display/api';
 
@@ -95,6 +96,7 @@ async function PDF(dataBuffer: {}) {
 		version: "",
 		formData: {},
 	};
+	//PDFJS.GlobalWorkerOptions.workerSrc = 'pdfjs-dist/pdf.worker.js';
 
 	ret.version = PDFJS.version;
 

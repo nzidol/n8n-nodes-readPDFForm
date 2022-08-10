@@ -2,7 +2,8 @@
 	"compilerOptions": {
 		"lib": [
 			"es2017",
-			"es2019"
+			"es2019",
+			"dom"
 		],
 		"types": [
 			"node",
