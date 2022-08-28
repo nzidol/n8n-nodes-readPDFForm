@@ -1,7 +1,7 @@
 {
-  "name": "n8n-nodes-readpdfform",
+  "name": "n8n-nodes-writepdfform",
   "version": "0.2.0",
-  "description": "n8n node to read PDF form data",
+  "description": "n8n node to write PDF form data",
   "keywords": [
     "n8n-community-node-package"
   ],
@@ -10,7 +10,7 @@
   "author": {"name" : "nzidol" },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nzidol/n8n-nodes-readPDFForm.git"
+    "url": "https://github.com/nzidol/n8n-nodes-writePDFForm.git"
   },
   "main": "index.js",
   "scripts": {
@@ -27,7 +27,7 @@
   "n8n": {
     "n8nNodesApiVersion": 1,
     "nodes": [
-      "dist/nodes/ReadPDFForm/ReadPDFForm.node.js"
+      "dist/nodes/WritePDFForm/WritePDFForm.node.js"
     ]
   },
   "devDependencies": {
@@ -43,7 +43,7 @@
     "typescript": "~4.6.0"
   },
   "dependencies": {
-    "pdfjs-dist": "^2.15.349",
+    "pdf-lib": "^1.17.1",
     "@types/node": "^18.6.3"
   }
 }
