@@ -3,6 +3,8 @@
 Extends the base ReadPDf node with the ability to extract PDF Form data. 
 To do this I removed the pdf-parse library and work directly with more recent version of pdfjs-dist.
 
+Community n8n package is here [npmjs](https://www.npmjs.com/package/n8n-nodes-readpdfform)
+
 ## Create PDF Form
 PDF Forms can be easily created with LibreOffice writer see [documentfoundation](https://wiki.documentfoundation.org/Videos/Create_a_fillable_form_in_Writer).
 There are still some small UI issues that can be frustrating but for most applications it does work.
