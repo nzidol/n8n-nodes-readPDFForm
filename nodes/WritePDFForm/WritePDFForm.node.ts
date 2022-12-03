@@ -59,7 +59,6 @@ export class WritePDFForm implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
-		console.log(items);
 		const returnData: INodeExecutionData[] = [];
 		const length = items.length;
 		let item: INodeExecutionData;
@@ -93,7 +92,7 @@ export class WritePDFForm implements INodeType {
 				}
 
 				const jsonData = item.json.data as unknown as FieldArrayJson;
-				console.log(jsonData);
+
 				if ( jsonData[0].type === undefined ||
 						 jsonData[0].name === undefined || jsonData[0].value === undefined) {
 					throw new NodeOperationError(
