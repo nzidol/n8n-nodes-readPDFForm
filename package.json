@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nzidol/n8n-nodes-writePDFForm.git"
+    "url": "https://github.com/nzidol/n8n-nodes-writepdfform.git"
   },
   "main": "index.js",
   "scripts": {
