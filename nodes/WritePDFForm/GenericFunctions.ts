@@ -1,11 +1,10 @@
 import { PDFDocument } from 'pdf-lib';
 
-type FieldArrayJson = Array<{name: string, type: string, value: string}>;
+export type FieldArrayJson = Array<{name: string, type: string, value: string}>;
 
-export async function fillForm(formUrl: "", jsonData: FieldArrayJson) {
+export async function fillForm(dataBuffer: ArrayBuffer, jsonData: FieldArrayJson) {
 
-	const formPdfBytes = await fetch(formUrl).then(res => res.arrayBuffer());
-	const pdfDoc = await PDFDocument.load(formPdfBytes);
+	const pdfDoc = await PDFDocument.load(dataBuffer);
 	const form = pdfDoc.getForm();
 
 	for (const field of jsonData) {

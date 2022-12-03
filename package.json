@@ -7,7 +7,9 @@
   ],
   "license": "MIT",
   "homepage": "",
-  "author": {"name" : "nzidol" },
+  "author": {
+    "name": "nzidol"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/nzidol/n8n-nodes-writePDFForm.git"
@@ -43,7 +45,7 @@
     "typescript": "~4.6.0"
   },
   "dependencies": {
-    "pdf-lib": "^1.17.1",
-    "@types/node": "^18.6.3"
+    "@types/node": "^18.6.3",
+    "pdf-lib": "^1.17.1"
   }
 }

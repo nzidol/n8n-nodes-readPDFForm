@@ -8,8 +8,10 @@ import {
 } from 'n8n-workflow';
 
 import {
-	fillForm
+	FieldArrayJson, fillForm
 } from './GenericFunctions';
+
+import { readFile as fsReadFile } from 'fs/promises';
 
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
@@ -29,19 +31,35 @@ export class WritePDFForm implements INodeType {
 		outputs: ['main'],
 		properties: [
 			{
-				displayName: 'JSON Property',
+				displayName: 'PDF Filename',
+				name: 'pdfFileName',
+				type: 'string',
+				default: 'form.pdf',
+				required: true,
+				description: 'Name of the PDF form which to write the data to',
+			},
+			{
+				displayName: 'Output File',
+				name: 'filePath',
+				type: 'string',
+				default: 'report.pdf',
+				required: true,
+				description: 'Name of the PDF file to write the output to',
+			},
+			{
+				displayName: 'JSON Property Name',
 				name: 'jsonPropertyName',
 				type: 'string',
 				default: 'data',
 				required: true,
-				description: 'Name of the JSON property from which to write to the PDF file',
+				description: 'Name of the JSON property to read the data from',
 			},
 		],
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
-
+		console.log(items);
 		const returnData: INodeExecutionData[] = [];
 		const length = items.length;
 		let item: INodeExecutionData;
@@ -51,29 +69,53 @@ export class WritePDFForm implements INodeType {
 			try{
 
 				item = items[itemIndex];
-				const dataPropertyName = this.getNodeParameter('dataPropertyName', itemIndex) as string;
+
+				const pdfFileName = this.getNodeParameter('pdfFileName', itemIndex) as string;
 				const filePath = this.getNodeParameter('filePath', itemIndex) as string;
 				const jsonPropertyName = this.getNodeParameter('jsonPropertyName', itemIndex) as string;
+
+				let pdfFile;
+				try {
+					pdfFile = (await fsReadFile(pdfFileName));
+				} catch (error) {
+					if (error.code === 'ENOENT') {
+						throw new NodeOperationError(
+							this.getNode(),
+							`The file "${pdfFileName}" could not be found.`,
+						);
+					}
+
+					throw error;
+				}
 
 				if (item.json === undefined) {
 					item.json = {};
 				}
 
-				const jsonData = this.helpers.returnJsonArray({jsonPropertyName});
+				const jsonData = item.json.data as unknown as FieldArrayJson;
+				console.log(jsonData);
+				if ( jsonData[0].type === undefined ||
+						 jsonData[0].name === undefined || jsonData[0].value === undefined) {
+					throw new NodeOperationError(
+						this.getNode(),
+						`The json data has the wrong structure (name/type/value).`,
+					);
+				}
 
 				let data;
-
 				try {
-					data = await PDFWrite(jsonData) as Buffer;
+					const raw = await PDFWrite(pdfFile, jsonData );
+					data = Buffer.from(raw);
 				} catch (error) {
 					if (error.code === 'ENOENT') {
 						throw new NodeOperationError(
 							this.getNode(),
-							`The pdf file could not be found.`,
+							`The report pdf could not be generated.`,
 						);
 					}
 					throw error;
 				}
+
 				const newItem: INodeExecutionData = {
 					json: item.json,
 					binary: {},
@@ -81,8 +123,7 @@ export class WritePDFForm implements INodeType {
 						item: itemIndex,
 					},
 				};
-
-				newItem.binary![dataPropertyName] = await this.helpers.prepareBinaryData(data, filePath);
+				newItem.binary![filePath] = await this.helpers.prepareBinaryData(data, filePath);
 				returnData.push(newItem);
 
 			} catch (error) {
@@ -104,19 +145,9 @@ export class WritePDFForm implements INodeType {
 	}
 }
 
-async function PDFWrite(dataBuffer: {}) {
+async function PDFWrite(dataBuffer: ArrayBuffer, json: FieldArrayJson) {
 	const isDebugMode = false;
 
-	const json =
-		[	{"name": "BusinessInformation.BusinessName", "type": "text", "value":"dave" },
-			{"name": "LicenseInformation.LicenseYear", "type": "text", "value":"2023" },
-			{"name": "LicenseInformation.AreaCouncilCode", "type": "dropdown", "value":"West Tanna Area Council: NAT011WAR" },
-			{"name": "LicenseInformation.CommencementDate", "type": "text", "value":"Jan 2024" },
-			{"name": "LicenseInformation.ApplicationTypeNew", "type": "radiogroup", "value":"2" },
-			{"name": "BusinessInformation.OptionVATExempted", "type": "checkbox", "value":"Yes" },
-			{"name": "LicenseApplication.DateApplicationReceived", "type": "text", "value":"11/12/2022" },
-		];
-
-	const ret = fillForm("", json);
+	const ret = fillForm(dataBuffer, json);
  	return ret;
 }
