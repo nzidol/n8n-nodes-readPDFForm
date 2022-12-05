@@ -1,19 +1,19 @@
 {
-	"node": "n8n-nodes-base.writePDFForm",
+	"node": "n8n-nodes-base.readPDFForm",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": [
-		"Community Nodes"
+		"Core Nodes"
 	],
 	"resources": {
 		"primaryDocumentation": [
 			{
-				"url": "https://github.com/nzidol/n8n-nodes-readPDFForm.git"
+				"url": ""
 			}
 		]
 	},
 	"subcategories": {
-		"Community Nodes": [
+		"Core Nodes": [
 			"Files"
 		]
 	}
