@@ -3,17 +3,17 @@
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": [
-		"Core Nodes"
+		"Community Nodes"
 	],
 	"resources": {
 		"primaryDocumentation": [
 			{
-				"url": ""
+				"url": "https://github.com/nzidol/n8n-nodes-readPDFForm.git"
 			}
 		]
 	},
 	"subcategories": {
-		"Core Nodes": [
+		"Community Nodes": [
 			"Files"
 		]
 	}
